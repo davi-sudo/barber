@@ -42,6 +42,31 @@ function App() {
     window.open(`https://wa.me/5519981864461?text=${message}`, '_blank', 'noopener,noreferrer')
   }
 
+  const downloadBookingCard = () => {
+    if (!service || !barber || !date || !time) return
+    const formattedDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(`${date}T12:00:00`))
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+      <rect width="1200" height="675" fill="#0a0a0a"/>
+      <rect x="42" y="42" width="1116" height="591" fill="none" stroke="#454545"/>
+      <text x="78" y="103" fill="#efefed" font-family="Arial, sans-serif" font-size="32" font-weight="800" letter-spacing="-2">OBSIDIAN</text>
+      <text x="78" y="150" fill="#979795" font-family="monospace" font-size="13" letter-spacing="2">COMPROVANTE DE AGENDAMENTO</text>
+      <line x1="78" y1="187" x2="1122" y2="187" stroke="#454545"/>
+      <text x="78" y="275" fill="#efefed" font-family="Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-4">CADEIRA RESERVADA.</text>
+      <text x="78" y="333" fill="#a5a5a3" font-family="monospace" font-size="18">${service[1].toUpperCase()}</text>
+      <text x="78" y="368" fill="#a5a5a3" font-family="monospace" font-size="18">${barber[1].toUpperCase()}</text>
+      <text x="78" y="445" fill="#efefed" font-family="Arial, sans-serif" font-size="31" font-weight="700">${formattedDate}</text>
+      <text x="78" y="486" fill="#efefed" font-family="Arial, sans-serif" font-size="31" font-weight="700">${time}</text>
+      <line x1="78" y1="558" x2="1122" y2="558" stroke="#454545"/>
+      <text x="78" y="599" fill="#979795" font-family="monospace" font-size="13" letter-spacing="1">RUA AUGUSTA, 1200 · SÃO PAULO</text>
+      <text x="1122" y="599" fill="#979795" font-family="monospace" font-size="13" letter-spacing="1" text-anchor="end">PRECISÃO NÃO É OPCIONAL.</text>
+    </svg>`
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
+    link.download = 'comprovante-obsidian.svg'
+    link.click()
+    URL.revokeObjectURL(link.href)
+  }
+
   return (
     <main id="top">
       <header className="site-header">
@@ -124,6 +149,7 @@ function App() {
           <div className="booking-field"><label className="field-label" htmlFor="booking-date">03 / Data</label><input id="booking-date" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(event) => setDate(event.target.value)} /></div>
           <div className="booking-field"><p className="field-label">04 / Horário</p><div className="hours">{hours.map((hour) => <button className={time === hour ? 'selected' : ''} onClick={() => setTime(hour)} key={hour}>{hour}</button>)}</div></div>
           <div className="booking-summary"><p className="field-label">Resumo</p>{service && barber && date && time ? <p>{service[1]}<br />{barber[1]}<br />{new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}</p> : <p>Selecione serviço, profissional, data e horário</p>}</div>
+          {service && barber && date && time && <div className="booking-card"><span>Obsidian</span><strong>Cadeira<br />reservada.</strong><p>{service[1]}<br />{barber[1]}<br />{new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}</p><button onClick={downloadBookingCard}>Baixar comprovante <span>↓</span></button></div>}
           <button className="button-solid confirm" disabled={!service || !barber || !date || !time} onClick={confirmBooking}>Confirmar no WhatsApp <span>→</span></button>
         </aside>
       </div>}
