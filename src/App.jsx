@@ -60,11 +60,20 @@ function App() {
       <text x="78" y="599" fill="#979795" font-family="monospace" font-size="13" letter-spacing="1">RUA AUGUSTA, 1200 · SÃO PAULO</text>
       <text x="1122" y="599" fill="#979795" font-family="monospace" font-size="13" letter-spacing="1" text-anchor="end">PRECISÃO NÃO É OPCIONAL.</text>
     </svg>`
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
-    link.download = 'comprovante-obsidian.svg'
-    link.click()
-    URL.revokeObjectURL(link.href)
+    const svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
+    const image = new Image()
+    image.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 1200
+      canvas.height = 675
+      canvas.getContext('2d').drawImage(image, 0, 0)
+      URL.revokeObjectURL(svgUrl)
+      const link = document.createElement('a')
+      link.href = canvas.toDataURL('image/png')
+      link.download = 'comprovante-obsidian.png'
+      link.click()
+    }
+    image.src = svgUrl
   }
 
   return (
