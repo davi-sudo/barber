@@ -8,11 +8,17 @@ const images = {
 }
 
 const services = [
-  ['01', 'The Signature Fade', 'Degradê preciso, linhas geométricas e acabamento cirúrgico.', 'R$ 80', '45 min', images.cut],
-  ['02', 'Straight-Razor Ritual', 'Barba esculpida à navalha com toalha quente e óleo.', 'R$ 70', '40 min', images.razor],
-  ['03', 'Sculpt & Style', 'Acabamento, modelagem e finalização premium.', 'R$ 50', '30 min', images.cut],
-  ['04', 'The Obsidian Combo', 'Corte signature + ritual de barba completos.', 'R$ 130', '80 min', images.razor],
-  ['05', 'The Blade Renewal', 'Corte + tratamento intensivo e hidratação profunda.', 'R$ 110', '60 min', images.cut],
+  ['01', 'Degradê Assinatura', 'Degradê preciso, linhas geométricas e acabamento cirúrgico.', 'R$ 80', '45 min', images.cut],
+  ['02', 'Ritual da Navalha', 'Barba esculpida à navalha com toalha quente e óleo.', 'R$ 70', '40 min', images.razor],
+  ['03', 'Esculpir e Modelar', 'Acabamento, modelagem e finalização premium.', 'R$ 50', '30 min', images.cut],
+  ['04', 'Combo Obsidiana', 'Corte assinatura + ritual de barba completos.', 'R$ 130', '80 min', images.razor],
+  ['05', 'Renovação da Lâmina', 'Corte + tratamento intensivo e hidratação profunda.', 'R$ 110', '60 min', images.cut],
+]
+
+const barbers = [
+  ['01', 'Rafael Nogueira', 'Especialista em degradês e linhas geométricas.', images.hero],
+  ['02', 'Caio Valente', 'Mestre em navalha e rituais de barba.', images.razor],
+  ['03', 'Davi Monteiro', 'Cortes clássicos e acabamento editorial.', images.cut],
 ]
 
 const hours = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']
@@ -20,6 +26,7 @@ const hours = ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '1
 function App() {
   const [bookingOpen, setBookingOpen] = useState(false)
   const [service, setService] = useState(null)
+  const [barber, setBarber] = useState(null)
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
 
@@ -29,9 +36,9 @@ function App() {
   }
 
   const confirmBooking = () => {
-    if (!service || !date || !time) return
+    if (!service || !barber || !date || !time) return
     const formattedDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date(`${date}T12:00:00`))
-    const message = `Olá! Quero reservar a cadeira.%0A%0AServiço: ${service[1]}%0AData: ${formattedDate}%0AHorário: ${time}%0A%0AConfirma disponibilidade?`
+    const message = `Olá! Quero reservar a cadeira.%0A%0AServiço: ${service[1]}%0AProfissional: ${barber[1]}%0AData: ${formattedDate}%0AHorário: ${time}%0A%0AConfirma disponibilidade?`
     window.open(`https://wa.me/5519981864461?text=${message}`, '_blank', 'noopener,noreferrer')
   }
 
@@ -49,9 +56,9 @@ function App() {
 
       <section className="hero-section">
         <div className="hero-copy">
-          <p className="eyebrow">São Paulo <i /> Est. 2019</p>
-          <h1>PRECISION<br /><em>IS NOT</em><br />OPTIONAL.</h1>
-          <p className="intro">A barbearia para quem entende que um corte é uma escultura. Geometria, navalha e silêncio dentro de um vault de obsidiana.</p>
+          <p className="eyebrow">São Paulo <i /> Desde 2019</p>
+          <h1>PRECISÃO<br /><em>NÃO É</em><br />OPCIONAL.</h1>
+          <p className="intro">A barbearia para quem entende que um corte é uma escultura. Geometria, navalha e silêncio dentro de um refúgio de obsidiana.</p>
           <div className="hero-actions">
             <button className="button-solid" onClick={() => openBooking()}>Reservar a cadeira <span>→</span></button>
             <a className="text-link" href="https://wa.me/5519981864461" target="_blank" rel="noreferrer">Falar no WhatsApp <span>↗</span></a>
@@ -66,7 +73,7 @@ function App() {
 
       <section className="services-section" id="services">
         <div className="section-heading">
-          <div><p className="eyebrow">02 <i /> Service Matrix</p><h2>O CATÁLOGO</h2></div>
+          <div><p className="eyebrow">02 <i /> Matriz de Serviços</p><h2>O CATÁLOGO</h2></div>
           <p>Cada serviço é um ritual de precisão.<br />Deslize para explorar.</p>
         </div>
         <div className="service-list">
@@ -96,16 +103,16 @@ function App() {
       </section>
 
       <footer id="contact">
-        <p className="footer-title">THE ART<br />OF THE CUT</p>
+        <p className="footer-title">A ARTE<br />DO CORTE</p>
         <div className="footer-grid">
           <div><p className="eyebrow">Obsidian Barber</p><p>Rua Augusta, 1200 — Consolação<br />São Paulo, SP — 01304-001</p></div>
           <div><p className="eyebrow">Horário</p><p>Ter–Sáb · 09:00 — 19:00</p></div>
           <div><p className="eyebrow">Contato</p><a href="mailto:contato@obsidianbarber.com.br">contato@obsidianbarber.com.br</a></div>
         </div>
-        <div className="footer-bottom"><span>© 2025 Obsidian Barber</span><span>Precision is not optional.</span></div>
+        <div className="footer-bottom"><span>© 2025 Obsidian Barber</span><span>Precisão não é opcional.</span></div>
       </footer>
 
-      <button className="reserve-tab" onClick={() => openBooking()}>RESERVE THE CHAIR <span>→</span></button>
+      <button className="reserve-tab" onClick={() => openBooking()}>RESERVE A CADEIRA <span>→</span></button>
       <a className="whatsapp-float" href="https://wa.me/5519981864461" target="_blank" rel="noreferrer" aria-label="Conversar no WhatsApp">↗</a>
 
       {bookingOpen && <div className="booking-layer" role="dialog" aria-modal="true" aria-labelledby="booking-title">
@@ -113,10 +120,11 @@ function App() {
         <aside className="booking-panel">
           <div className="booking-top"><div><p className="eyebrow">Agendamento</p><h2 id="booking-title">RESERVE A<br />CADEIRA</h2></div><button onClick={() => setBookingOpen(false)}>Fechar <span>×</span></button></div>
           <div className="booking-field"><p className="field-label">01 / Serviço</p><div className="booking-services">{services.map((item) => <button className={service?.[0] === item[0] ? 'selected' : ''} onClick={() => setService(item)} key={item[0]}><span>{item[1]}</span><strong>{item[3]}</strong></button>)}</div></div>
-          <div className="booking-field"><label className="field-label" htmlFor="booking-date">02 / Data</label><input id="booking-date" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(event) => setDate(event.target.value)} /></div>
-          <div className="booking-field"><p className="field-label">03 / Horário</p><div className="hours">{hours.map((hour) => <button className={time === hour ? 'selected' : ''} onClick={() => setTime(hour)} key={hour}>{hour}</button>)}</div></div>
-          <div className="booking-summary"><p className="field-label">Resumo</p>{service && date && time ? <p>{service[1]}<br />{new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}</p> : <p>Selecione serviço, data e horário</p>}</div>
-          <button className="button-solid confirm" disabled={!service || !date || !time} onClick={confirmBooking}>Confirmar no WhatsApp <span>→</span></button>
+          <div className="booking-field"><p className="field-label">02 / Profissional</p><div className="barber-list">{barbers.map((item) => <button className={barber?.[0] === item[0] ? 'selected' : ''} onClick={() => setBarber(item)} key={item[0]}><img src={item[3]} alt="" /><span><strong>{item[1]}</strong><small>{item[2]}</small></span></button>)}</div></div>
+          <div className="booking-field"><label className="field-label" htmlFor="booking-date">03 / Data</label><input id="booking-date" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(event) => setDate(event.target.value)} /></div>
+          <div className="booking-field"><p className="field-label">04 / Horário</p><div className="hours">{hours.map((hour) => <button className={time === hour ? 'selected' : ''} onClick={() => setTime(hour)} key={hour}>{hour}</button>)}</div></div>
+          <div className="booking-summary"><p className="field-label">Resumo</p>{service && barber && date && time ? <p>{service[1]}<br />{barber[1]}<br />{new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}</p> : <p>Selecione serviço, profissional, data e horário</p>}</div>
+          <button className="button-solid confirm" disabled={!service || !barber || !date || !time} onClick={confirmBooking}>Confirmar no WhatsApp <span>→</span></button>
         </aside>
       </div>}
     </main>
