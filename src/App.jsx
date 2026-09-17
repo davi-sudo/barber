@@ -29,49 +29,86 @@ function App() {
   const [barber, setBarber] = useState(null)
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
+  const [customerName, setCustomerName] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
+  const [createdAt, setCreatedAt] = useState(null)
+  const [downloadError, setDownloadError] = useState('')
+  const phoneDigits = customerPhone.replace(/\D/g, '')
+  const nationalPhone = phoneDigits.length > 11 && phoneDigits.startsWith('55') ? phoneDigits.slice(2) : phoneDigits
+  const validPhone = /^[1-9]{2}(?:[2-5]\d{7}|9\d{8})$/.test(nationalPhone) && /^[+\d\s().-]+$/.test(customerPhone)
+  const validName = customerName.trim().length >= 2
+  const bookingReady = Boolean(service && barber && date && time && validName && validPhone)
+  const createdLabel = createdAt ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(createdAt) : ''
+  const contactPhone = `+55 ${nationalPhone}`
 
   const openBooking = (selected) => {
     if (selected) setService(selected)
+    if (!createdAt) setCreatedAt(new Date())
     setBookingOpen(true)
   }
 
   const confirmBooking = () => {
-    if (!service || !barber || !date || !time) return
+    if (!bookingReady) return
     const formattedDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date(`${date}T12:00:00`))
-    const message = `Olá! Quero reservar a cadeira.%0A%0AServiço: ${service[1]}%0AProfissional: ${barber[1]}%0AData: ${formattedDate}%0AHorário: ${time}%0A%0AConfirma disponibilidade?`
-    window.open(`https://wa.me/5519981864461?text=${message}`, '_blank', 'noopener,noreferrer')
+    const message = `Olá! Quero reservar a cadeira.\n\nCliente: ${customerName.trim()}\nTelefone/WhatsApp: ${contactPhone}\nServiço: ${service[1]}\nProfissional: ${barber[1]}\nData do atendimento: ${formattedDate}\nHorário: ${time}\nSolicitação criada em: ${createdLabel}\n\nConfirma disponibilidade?`
+    window.open(`https://wa.me/5519981864461?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
   }
 
   const downloadBookingCard = () => {
-    if (!service || !barber || !date || !time) return
+    if (!bookingReady) return
+    setDownloadError('')
     const formattedDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(`${date}T12:00:00`))
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
-      <rect width="1200" height="675" fill="#0a0a0a"/>
-      <rect x="42" y="42" width="1116" height="591" fill="none" stroke="#454545"/>
-      <text x="78" y="103" fill="#efefed" font-family="Arial, sans-serif" font-size="32" font-weight="800" letter-spacing="-2">OBSIDIAN</text>
-      <text x="78" y="150" fill="#979795" font-family="monospace" font-size="13" letter-spacing="2">COMPROVANTE DE AGENDAMENTO</text>
-      <line x1="78" y1="187" x2="1122" y2="187" stroke="#454545"/>
-      <text x="78" y="275" fill="#efefed" font-family="Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-4">CADEIRA RESERVADA.</text>
-      <text x="78" y="333" fill="#a5a5a3" font-family="monospace" font-size="18">${service[1].toUpperCase()}</text>
-      <text x="78" y="368" fill="#a5a5a3" font-family="monospace" font-size="18">${barber[1].toUpperCase()}</text>
-      <text x="78" y="445" fill="#efefed" font-family="Arial, sans-serif" font-size="31" font-weight="700">${formattedDate}</text>
-      <text x="78" y="486" fill="#efefed" font-family="Arial, sans-serif" font-size="31" font-weight="700">${time}</text>
-      <line x1="78" y1="558" x2="1122" y2="558" stroke="#454545"/>
-      <text x="78" y="599" fill="#979795" font-family="monospace" font-size="13" letter-spacing="1">RUA AUGUSTA, 1200 · SÃO PAULO</text>
-      <text x="1122" y="599" fill="#979795" font-family="monospace" font-size="13" letter-spacing="1" text-anchor="end">PRECISÃO NÃO É OPCIONAL.</text>
+    const escapeXml = (value) => String(value).replace(/[<>&"']/g, (character) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' })[character])
+    const nameLines = customerName.trim().match(/.{1,48}(?:\s|$)|.{1,48}/gu) || []
+    const nameText = nameLines.map((line, index) => `<tspan x="78" dy="${index === 0 ? 0 : 28}">${escapeXml(line.trim())}</tspan>`).join('')
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1000" viewBox="0 0 1200 1000">
+      <rect width="1200" height="1000" fill="#0a0a0a"/>
+      <rect x="42" y="42" width="1116" height="916" fill="none" stroke="#454545"/>
+      <g fill="#efefed" font-family="Arial, sans-serif">
+        <text x="78" y="103" font-size="32" font-weight="800" letter-spacing="-2">OBSIDIAN</text>
+        <text x="78" y="210" font-size="58" font-weight="800" letter-spacing="-3">SOLICITAÇÃO DE RESERVA.</text>
+      </g>
+      <g fill="#a5a5a3" font-family="monospace" font-size="20">
+        <text x="78" y="260">AGUARDANDO CONFIRMAÇÃO DA BARBEARIA</text>
+        <text x="78" y="330">CLIENTE</text>
+        <text x="78" y="366" fill="#efefed">${nameText}</text>
+        <text x="78" y="468">TELEFONE / WHATSAPP DO CLIENTE</text>
+        <text x="78" y="505" fill="#efefed">${escapeXml(contactPhone)}</text>
+        <text x="78" y="572">SERVIÇO: ${escapeXml(service[1])}</text>
+        <text x="78" y="610">PROFISSIONAL: ${escapeXml(barber[1])}</text>
+        <text x="78" y="672" fill="#efefed">ATENDIMENTO: ${escapeXml(formattedDate)} · ${escapeXml(time)}</text>
+        <text x="78" y="734">SOLICITAÇÃO CRIADA EM: ${escapeXml(createdLabel)}</text>
+        <text x="78" y="810">WHATSAPP DA BARBEARIA: +55 (19) 98186-4461</text>
+        <text x="78" y="908" font-size="16">RUA AUGUSTA, 1200 · SÃO PAULO</text>
+        <text x="1122" y="908" font-size="16" text-anchor="end">PRECISÃO NÃO É OPCIONAL.</text>
+      </g>
+      <path d="M78 140H1122 M78 290H1122 M78 855H1122" stroke="#454545"/>
     </svg>`
     const svgUrl = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
     const image = new Image()
     image.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = 1200
-      canvas.height = 675
-      canvas.getContext('2d').drawImage(image, 0, 0)
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = 1200
+        canvas.height = 1000
+        const context = canvas.getContext('2d')
+        if (!context) throw new Error('Canvas indisponível')
+        context.drawImage(image, 0, 0)
+        const link = document.createElement('a')
+        link.href = canvas.toDataURL('image/png')
+        link.download = 'comprovante-obsidian.png'
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+      } catch {
+        setDownloadError('Não foi possível gerar o PNG. Tente novamente.')
+      } finally {
+        URL.revokeObjectURL(svgUrl)
+      }
+    }
+    image.onerror = () => {
       URL.revokeObjectURL(svgUrl)
-      const link = document.createElement('a')
-      link.href = canvas.toDataURL('image/png')
-      link.download = 'comprovante-obsidian.png'
-      link.click()
+      setDownloadError('Não foi possível gerar o PNG. Tente novamente.')
     }
     image.src = svgUrl
   }
@@ -157,9 +194,21 @@ function App() {
           <div className="booking-field"><p className="field-label">02 / Profissional</p><div className="barber-list">{barbers.map((item) => <button className={barber?.[0] === item[0] ? 'selected' : ''} onClick={() => setBarber(item)} key={item[0]}><img src={item[3]} alt="" /><span><strong>{item[1]}</strong><small>{item[2]}</small></span></button>)}</div></div>
           <div className="booking-field"><label className="field-label" htmlFor="booking-date">03 / Data</label><input id="booking-date" type="date" min={new Date().toISOString().slice(0, 10)} value={date} onChange={(event) => setDate(event.target.value)} /></div>
           <div className="booking-field"><p className="field-label">04 / Horário</p><div className="hours">{hours.map((hour) => <button className={time === hour ? 'selected' : ''} onClick={() => setTime(hour)} key={hour}>{hour}</button>)}</div></div>
-          <div className="booking-summary"><p className="field-label">Resumo</p>{service && barber && date && time ? <p>{service[1]}<br />{barber[1]}<br />{new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}</p> : <p>Selecione serviço, profissional, data e horário</p>}</div>
-          {service && barber && date && time && <div className="booking-card"><span>Obsidian</span><strong>Cadeira<br />reservada.</strong><p>{service[1]}<br />{barber[1]}<br />{new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}</p><button onClick={downloadBookingCard}>Baixar comprovante <span>↓</span></button></div>}
-          <button className="button-solid confirm" disabled={!service || !barber || !date || !time} onClick={confirmBooking}>Confirmar no WhatsApp <span>→</span></button>
+          <div className="booking-field">
+            <label className="field-label" htmlFor="customer-name">05 / Nome do cliente</label>
+            <input id="customer-name" type="text" autoComplete="name" required minLength={2} maxLength={100} value={customerName} onChange={(event) => setCustomerName(event.target.value)} aria-invalid={customerName !== '' && !validName} aria-describedby="customer-name-help" />
+            <p className="field-help" id="customer-name-help">Informe seu nome para identificar a solicitação (mínimo de 2 caracteres).</p>
+          </div>
+          <div className="booking-field">
+            <label className="field-label" htmlFor="customer-phone">06 / Telefone e WhatsApp para retorno</label>
+            <input id="customer-phone" type="tel" inputMode="tel" autoComplete="tel" required maxLength={25} placeholder="(11) 99999-9999" value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} aria-invalid={customerPhone !== '' && !validPhone} aria-describedby="customer-phone-help" />
+            <p className="field-help" id="customer-phone-help">Informe um número brasileiro com DDD. O código +55 é opcional.</p>
+          </div>
+          <div className="booking-summary"><p className="field-label">Resumo</p>{bookingReady ? <p>Cliente: {customerName.trim()}<br />Telefone/WhatsApp: {contactPhone}<br />Serviço: {service[1]}<br />Profissional: {barber[1]}<br />Atendimento: {new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}<br />Solicitação criada em: {createdLabel}<br />WhatsApp da barbearia: +55 (19) 98186-4461</p> : <p>Selecione serviço, profissional, data e horário e preencha nome e WhatsApp válidos.</p>}</div>
+          {bookingReady && <div className="booking-card"><span>Obsidian</span><strong>Solicitação<br />de reserva.</strong><p>Cliente: {customerName.trim()}<br />Telefone/WhatsApp: {contactPhone}<br />Serviço: {service[1]}<br />Profissional: {barber[1]}<br />Atendimento: {new Intl.DateTimeFormat('pt-BR').format(new Date(`${date}T12:00:00`))} · {time}<br />Solicitação criada em: {createdLabel}<br />WhatsApp da barbearia: +55 (19) 98186-4461</p><p>Aguardando confirmação da barbearia.</p><button onClick={downloadBookingCard}>Baixar card PNG <span>↓</span></button></div>}
+          {downloadError && <p className="field-help" role="alert">{downloadError}</p>}
+          <button className="button-solid confirm" disabled={!bookingReady} onClick={confirmBooking}>Solicitar pelo WhatsApp <span>→</span></button>
+          <p className="field-help">Os dados serão incluídos no card e na mensagem do WhatsApp. O site não armazena reservas; envie a mensagem para solicitar a confirmação.</p>
         </aside>
       </div>}
     </main>
