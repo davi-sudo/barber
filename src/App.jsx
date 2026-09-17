@@ -35,7 +35,8 @@ function App() {
   const [downloadError, setDownloadError] = useState('')
   const phoneDigits = customerPhone.replace(/\D/g, '')
   const nationalPhone = phoneDigits.length > 11 && phoneDigits.startsWith('55') ? phoneDigits.slice(2) : phoneDigits
-  const validPhone = /^[1-9]{2}(?:[2-5]\d{7}|9\d{8})$/.test(nationalPhone) && /^[+\d\s().-]+$/.test(customerPhone)
+  const hasDigits = phoneDigits.length >= 10
+  const validPhone = hasDigits && /^[\d\s]+$/.test(customerPhone)
   const validName = customerName.trim().length >= 2
   const bookingReady = Boolean(service && barber && date && time && validName && validPhone)
   const createdLabel = createdAt ? new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(createdAt) : ''
@@ -50,8 +51,8 @@ function App() {
   const confirmBooking = () => {
     if (!bookingReady) return
     const formattedDate = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date(`${date}T12:00:00`))
-    const message = `Olá! Quero reservar a cadeira.\n\nCliente: ${customerName.trim()}\nTelefone/WhatsApp: ${contactPhone}\nServiço: ${service[1]}\nProfissional: ${barber[1]}\nData do atendimento: ${formattedDate}\nHorário: ${time}\nSolicitação criada em: ${createdLabel}\n\nConfirma disponibilidade?`
-    window.open(`https://wa.me/5519981864461?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
+    const msg = `Olá! Quero reservar a cadeira.%0ACliente: ${customerName.trim()}%0ATelefone: ${contactPhone}%0AServiço: ${service[1]}%0AProfissional: ${barber[1]}%0AData: ${formattedDate}%0AHorário: ${time}%0AConfirma?`
+    window.open(`https://wa.me/5519981864461?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer')
   }
 
   const downloadBookingCard = () => {
