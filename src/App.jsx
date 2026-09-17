@@ -207,18 +207,16 @@ function App() {
 
             <div className="booking-field">
               <p className="field-label">01 / Serviços</p>
-              <div className="booking-services">
+              <div className="services-grid">
                 {services.map((item) => (
-                  <label key={item[0]} className={`service-checkbox ${selectedServices.includes(item[0]) ? 'checked' : ''}`}>
-                    <input
-                      type="checkbox"
-                      checked={selectedServices.includes(item[0])}
-                      onChange={() => toggleService(item[0])}
-                    />
-                    <span className="checkbox-custom"></span>
-                    <span className="service-name">{item[1]}</span>
-                    <strong className="service-price">{formatPrice(item[3])}</strong>
-                  </label>
+                  <button
+                    key={item[0]}
+                    className={selectedServices.includes(item[0]) ? 'selected' : ''}
+                    onClick={() => toggleService(item[0])}
+                  >
+                    <span className="service-btn-name">{item[1]}</span>
+                    <span className="service-btn-price">{formatPrice(item[3])}</span>
+                  </button>
                 ))}
               </div>
             </div>
